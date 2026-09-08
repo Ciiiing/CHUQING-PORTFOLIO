@@ -1,0 +1,11 @@
+.shiny-text {
+  display: inline-block;
+  white-space: pre-line;
+  will-change: background-position;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shiny-text {
+    will-change: auto;
+  }
+}

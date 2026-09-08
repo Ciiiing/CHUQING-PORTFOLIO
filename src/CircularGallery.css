@@ -1,0 +1,34 @@
+.circular-gallery {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.circular-gallery__canvas {
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+  touch-action: pan-y;
+}
+
+.circular-gallery__canvas:active { cursor: grabbing; }
+.circular-gallery__canvas:focus-visible { outline: 2px solid var(--yellow); outline-offset: -7px; }
+.circular-gallery__canvas canvas { display: block; width: 100%; height: 100%; }
+.circular-gallery__tooltip {
+  position: absolute;
+  z-index: 4;
+  max-width: 260px;
+  padding: 8px 11px;
+  border: 1px solid rgba(242, 245, 245, .34);
+  border-radius: 2px;
+  color: var(--paper);
+  background: #061a3b;
+  font-family: 'Noto Sans SC', sans-serif;
+  font-size: 12px;
+  line-height: 1.35;
+  pointer-events: none;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, .28);
+}
+.circular-gallery__caption { position: absolute; z-index: 2; right: 22px; bottom: 16px; left: 22px; display: flex; align-items: baseline; gap: 12px; margin: 0; color: var(--paper); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: .04em; line-height: 1.4; pointer-events: none; text-shadow: 0 2px 16px rgba(0,0,0,.85); }
+.circular-gallery__caption span { color: var(--yellow); font-size: 9px; }

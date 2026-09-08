@@ -1,0 +1,86 @@
+.line-sidebar {
+  --accent-color: var(--yellow);
+  --text-color: rgba(242, 245, 245, .72);
+  --marker-color: rgba(242, 245, 245, .38);
+  --marker-length: 48px;
+  --marker-gap: 0px;
+  --tick-scale: .5;
+  --max-shift: 28px;
+  --item-gap: 22px;
+  --font-size: clamp(12px, 1.1vw, 17px);
+  --smoothing: 100ms;
+
+  position: relative;
+  display: flex;
+  min-height: 720px;
+  align-items: center;
+  justify-content: flex-start;
+  padding-left: 0;
+}
+
+.line-sidebar--markers { padding-left: calc(var(--marker-length) + var(--marker-gap)); }
+
+.line-sidebar__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--item-gap);
+  margin: 0;
+  padding: 1rem 0;
+  list-style: none;
+}
+
+.line-sidebar__item { position: relative; cursor: pointer; }
+.line-sidebar__item:focus-visible { outline: 1px solid var(--yellow); outline-offset: 6px; }
+
+.line-sidebar__item::before {
+  position: absolute;
+  inset: -6px -48px;
+  content: '';
+}
+
+.line-sidebar__label {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  color: color-mix(in srgb, var(--accent-color) calc(var(--effect, 0) * 100%), var(--text-color));
+  font-size: var(--font-size);
+  font-weight: 500;
+  line-height: 1.2;
+  transform: translateX(calc(var(--effect, 0) * var(--max-shift))) scale(calc(1 + var(--effect, 0) * .35));
+  transform-origin: left center;
+}
+
+.line-sidebar__index {
+  margin-right: .6rem;
+  font-family: 'DM Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: .85em;
+  opacity: calc(.55 + var(--effect, 0) * .45);
+}
+
+.line-sidebar__marker {
+  position: absolute;
+  top: 50%;
+  left: calc(-1 * var(--marker-length) - var(--marker-gap));
+  width: var(--marker-length);
+  height: 1px;
+  background-color: color-mix(in srgb, var(--accent-color) calc(var(--effect, 0) * 100%), var(--marker-color));
+  transform: translateY(-50%) scaleX(calc(.7 + var(--effect, 0) * .5));
+  transform-origin: left center;
+}
+
+.line-sidebar--markers .line-sidebar__item:not(:last-child)::after {
+  position: absolute;
+  top: calc(100% + var(--item-gap) / 2);
+  left: calc(-1 * var(--marker-length) - var(--marker-gap));
+  width: calc(var(--marker-length) * var(--tick-scale));
+  height: 1px;
+  background-color: var(--marker-color);
+  content: '';
+  opacity: .5;
+  transform: translateY(-50%);
+}
+
+.line-sidebar--scale-tick .line-sidebar__item:not(:last-child)::after {
+  transform: translateY(-50%) scaleX(calc(.7 + var(--effect, 0) * .6));
+  transform-origin: left center;
+}

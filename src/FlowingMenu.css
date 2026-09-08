@@ -1,0 +1,81 @@
+.flowing-menu-wrap {
+  width: 100%;
+  overflow: hidden;
+  border-top: 1px solid rgba(242, 245, 245, .18);
+}
+
+.flowing-menu {
+  display: flex;
+  flex-direction: column;
+}
+
+.flowing-menu__item {
+  position: relative;
+  display: grid;
+  min-height: 48px;
+  grid-template-columns: 281px minmax(0, 1fr) 52px;
+  align-items: center;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(242, 245, 245, .18);
+}
+
+.flowing-menu__date,
+.flowing-menu__index {
+  position: relative;
+  z-index: 2;
+  color: rgba(242, 245, 245, .56);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .04em;
+}
+
+.flowing-menu__date { padding-left: 4px; color: var(--yellow); }
+.flowing-menu__index { text-align: right; }
+
+.flowing-menu__link {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-start;
+  height: 100%;
+  color: var(--paper);
+  font-size: clamp(17px, 1.65vw, 25px);
+  font-weight: 500;
+  letter-spacing: -.02em;
+  line-height: 1;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.flowing-menu__link:focus-visible { color: var(--ink); }
+
+.flowing-menu__marquee {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  overflow: hidden;
+  color: var(--ink);
+  background: var(--paper);
+  pointer-events: none;
+  transform: translate3d(0, 101%, 0);
+}
+
+.flowing-menu__inner-wrap { width: 100%; height: 100%; overflow: hidden; }
+.flowing-menu__inner { display: flex; width: max-content; height: 100%; align-items: center; will-change: transform; }
+.flowing-menu__part { display: flex; flex: 0 0 auto; align-items: center; }
+.flowing-menu__part > span { padding-inline: 18px; font-family: 'Bebas Neue', 'Arial Narrow', sans-serif; font-size: clamp(30px, 3.4vw, 48px); letter-spacing: .02em; line-height: 1; white-space: nowrap; }
+.flowing-menu__image { width: clamp(128px, 15vw, 214px); height: 34px; margin-inline: 20px; border-radius: 999px; background-position: center; background-size: cover; }
+
+.flowing-menu__item:hover .flowing-menu__date,
+.flowing-menu__item:hover .flowing-menu__index,
+.flowing-menu__item:focus-within .flowing-menu__date,
+.flowing-menu__item:focus-within .flowing-menu__index { color: var(--ink); }
+
+@media (prefers-reduced-motion: reduce) {
+  .flowing-menu__marquee { transform: translate3d(0, 101%, 0); }
+  .flowing-menu__item:hover .flowing-menu__marquee,
+  .flowing-menu__item:focus-within .flowing-menu__marquee { transform: translate3d(0, 0, 0); }
+  .flowing-menu__inner { transform: none !important; }
+}
