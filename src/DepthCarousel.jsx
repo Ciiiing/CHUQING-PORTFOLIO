@@ -104,17 +104,19 @@ export default function DepthCarousel({ items, className = '', onChange, onSelec
   useEffect(() => {
     const root = rootRef.current
     if (!root) return undefined
-    const preload = () => root.querySelectorAll('img[data-gallery-image]').forEach((image) => { image.loading = 'eager' })
+    const images = [...root.querySelectorAll('img[data-gallery-image]')]
     if (!('IntersectionObserver' in window)) {
-      preload()
+      images.forEach((image) => { image.loading = 'eager' })
       return undefined
     }
-    const observer = new IntersectionObserver(([entry]) => {
-      if (!entry.isIntersecting) return
-      preload()
-      observer.disconnect()
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return
+        entry.target.loading = 'eager'
+        observer.unobserve(entry.target)
+      })
     }, { root: root.closest('.scroll-frame') ?? null, rootMargin: '900px 0px' })
-    observer.observe(root)
+    images.forEach((image) => observer.observe(image))
     return () => observer.disconnect()
   }, [data.length])
 
