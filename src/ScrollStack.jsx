@@ -31,6 +31,7 @@ const ScrollStack = forwardRef(function ScrollStack({ children, onActiveIndexCha
     if (!scroller) return
 
     const stackPosition = scroller.clientHeight * .18
+    const compactLayout = scroller.clientWidth < 560
     let activeIndex = 0
 
     cardsRef.current.forEach((card, index) => {
@@ -72,8 +73,10 @@ const ScrollStack = forwardRef(function ScrollStack({ children, onActiveIndexCha
         card.style.opacity = '1'
         card.style.pointerEvents = 'auto'
         const depthAhead = index - activeIndex
-        const stackScale = Math.max(1.28, 1.5 - (depthAhead - 1) * .04)
-        const settledScale = 1.07
+        const stackScale = compactLayout
+          ? Math.max(1.04, 1.12 - (depthAhead - 1) * .02)
+          : Math.max(1.28, 1.5 - (depthAhead - 1) * .04)
+        const settledScale = compactLayout ? 1.02 : 1.07
         const entryScale = index === activeIndex + 1
           ? stackScale - (stackScale - settledScale) * smoothStep(entryProgress)
           : stackScale
@@ -96,10 +99,10 @@ const ScrollStack = forwardRef(function ScrollStack({ children, onActiveIndexCha
         ? smoothStep(clamp((scroller.scrollTop - activeTrigger) / 240))
         : 1
       const scale = isEnteringActive
-        ? 1.07 - settleProgress * .03
+        ? (compactLayout ? 1.02 : 1.07) - settleProgress * (compactLayout ? .01 : .03)
         : isJustLeft
-          ? 1.04 - leaveProgress * .025
-          : Math.max(.88, 1.04 - depth * .025)
+          ? (compactLayout ? 1 : 1.04) - leaveProgress * (compactLayout ? .01 : .025)
+          : Math.max(compactLayout ? .94 : .88, (compactLayout ? 1 : 1.04) - depth * (compactLayout ? .015 : .025))
       card.style.transform = `translate3d(0, ${translateY}px, 0) scale(${scale})`
       card.style.zIndex = String(index + 1)
     })

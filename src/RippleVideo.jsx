@@ -327,7 +327,7 @@ export default function RippleVideo({ src, poster }) {
 
   return (
     <div className="ripple-video">
-      <video ref={videoRef} className="ripple-video__fallback" src={src} poster={poster} crossOrigin="anonymous" autoPlay muted loop playsInline />
+      <video ref={videoRef} className="ripple-video__fallback" src={src} poster={poster} crossOrigin="anonymous" autoPlay muted loop playsInline preload="metadata" />
       <div ref={mountRef} className="ripple-video__mount" />
     </div>
   )

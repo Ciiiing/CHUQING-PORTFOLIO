@@ -82,7 +82,8 @@ export default function DepthCarousel({ items, className = '', onChange, onSelec
     const root = rootRef.current
     if (!root) return undefined
     const observer = new ResizeObserver(([entry]) => {
-      scaleRef.current = clamp(entry.contentRect.width / 720, .62, 1)
+      // Let the active card fit inside a narrow viewport instead of being clipped.
+      scaleRef.current = clamp(entry.contentRect.width / 720, .46, 1)
       layout(positionRef.current)
     })
     observer.observe(root)
@@ -171,7 +172,7 @@ export default function DepthCarousel({ items, className = '', onChange, onSelec
               else changeFocus(index)
             }}
           >
-            <img src={item.image} alt="" draggable="false" />
+            <img src={item.image} alt="" loading="lazy" decoding="async" draggable="false" />
             <span ref={(element) => { tintRefs.current[index] = element }} />
           </button>
         ))}

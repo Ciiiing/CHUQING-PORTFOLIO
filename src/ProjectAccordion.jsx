@@ -50,7 +50,7 @@ function ProjectAccordion({ items, onSelect }) {
             onKeyDown={(event) => handleKeyDown(event, index)}
           >
             <span className="project-accordion-media" aria-hidden="true">
-              <img src={item.image} alt="" draggable="false" />
+              <img src={item.image} alt="" loading="lazy" decoding="async" draggable="false" />
               <span className="project-accordion-shade" />
             </span>
             <span className="project-accordion-index">{String(index + 1).padStart(2, '0')}</span>

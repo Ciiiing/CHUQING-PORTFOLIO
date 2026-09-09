@@ -793,6 +793,7 @@ function App() {
     const scroller = scrollFrameRef.current
     if (!scroller || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined
 
+    let disposed = false
     const ctx = gsap.context(() => {
       const intro = gsap.timeline({ defaults: { ease: 'power3.out' } })
       intro
@@ -854,10 +855,21 @@ function App() {
         })
       })
 
-      requestAnimationFrame(() => ScrollTrigger.refresh())
+      const refreshAfterFonts = async () => {
+        try {
+          await document.fonts?.ready
+        } catch {
+          // Font loading is non-critical; the fallback metrics are still valid.
+        }
+        if (!disposed) requestAnimationFrame(() => ScrollTrigger.refresh())
+      }
+      refreshAfterFonts()
     }, scroller)
 
-    return () => ctx.revert()
+    return () => {
+      disposed = true
+      ctx.revert()
+    }
   }, [language])
 
   useEffect(() => {

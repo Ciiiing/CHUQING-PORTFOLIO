@@ -301,6 +301,7 @@ export default function CircularGallery({ items, bend = 3, textColor = '#f2f5f5'
   const containerRef = useRef(null)
   const [activeIndex, setActiveIndex] = useState(0)
   const [tooltip, setTooltip] = useState(null)
+  const [isNearViewport, setIsNearViewport] = useState(false)
   const onActiveChange = useCallback((index) => setActiveIndex(index), [])
   const handleSelect = useCallback((index) => onSelect?.(index, containerRef.current), [onSelect])
   const onHover = useCallback((hit, event) => {
@@ -313,7 +314,23 @@ export default function CircularGallery({ items, bend = 3, textColor = '#f2f5f5'
   }, [])
 
   useEffect(() => {
-    if (!containerRef.current || !items.length) return undefined
+    const element = containerRef.current
+    if (!element) return undefined
+    if (!('IntersectionObserver' in window)) {
+      setIsNearViewport(true)
+      return undefined
+    }
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return
+      setIsNearViewport(true)
+      observer.disconnect()
+    }, { root: element.closest('.scroll-frame') ?? null, rootMargin: '420px 0px' })
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (!isNearViewport || !containerRef.current || !items.length) return undefined
     const app = new GalleryApp(containerRef.current, items, { bend, textColor, font, scrollSpeed, scrollEase, onActiveChange, onHover, onSelect: handleSelect })
     const observer = new ResizeObserver(() => app.resize())
     observer.observe(containerRef.current)
@@ -321,7 +338,7 @@ export default function CircularGallery({ items, bend = 3, textColor = '#f2f5f5'
       observer.disconnect()
       app.destroy()
     }
-  }, [items, bend, textColor, font, scrollSpeed, scrollEase, onActiveChange, onHover, handleSelect])
+  }, [isNearViewport, items, bend, textColor, font, scrollSpeed, scrollEase, onActiveChange, onHover, handleSelect])
 
   const activeItem = items[activeIndex] ?? items[0]
   return (
