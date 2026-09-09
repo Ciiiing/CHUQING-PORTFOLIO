@@ -101,6 +101,23 @@ export default function DepthCarousel({ items, className = '', onChange, onSelec
     }
   }, [layout])
 
+  useEffect(() => {
+    const root = rootRef.current
+    if (!root) return undefined
+    const preload = () => root.querySelectorAll('img[data-gallery-image]').forEach((image) => { image.loading = 'eager' })
+    if (!('IntersectionObserver' in window)) {
+      preload()
+      return undefined
+    }
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return
+      preload()
+      observer.disconnect()
+    }, { root: root.closest('.scroll-frame') ?? null, rootMargin: '900px 0px' })
+    observer.observe(root)
+    return () => observer.disconnect()
+  }, [data.length])
+
   const onWheel = useCallback((event) => {
     if (data.length < 2) return
     event.preventDefault()
@@ -172,7 +189,7 @@ export default function DepthCarousel({ items, className = '', onChange, onSelec
               else changeFocus(index)
             }}
           >
-            <img src={item.image} alt="" decoding="async" draggable="false" />
+            <img data-gallery-image src={item.image} alt="" loading="lazy" decoding="async" draggable="false" />
             <span ref={(element) => { tintRefs.current[index] = element }} />
           </button>
         ))}

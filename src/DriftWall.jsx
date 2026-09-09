@@ -68,6 +68,23 @@ export default function DriftWall({
   }, [columnItems, gap, measureTracks])
 
   useEffect(() => {
+    const root = containerRef.current
+    if (!root) return undefined
+    const preload = () => root.querySelectorAll('img[data-gallery-image]').forEach((image) => { image.loading = 'eager' })
+    if (!('IntersectionObserver' in window)) {
+      preload()
+      return undefined
+    }
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return
+      preload()
+      observer.disconnect()
+    }, { root: root.closest('.scroll-frame') ?? null, rootMargin: '900px 0px' })
+    observer.observe(root)
+    return () => observer.disconnect()
+  }, [columnItems.length])
+
+  useEffect(() => {
     offsetsRef.current = columnItems.map((_, index) => (cycleHeightsRef.current[index] || 1) * ((index * 0.31) % 1))
     velocitiesRef.current = columnItems.map(() => 0)
   }, [columnItems])
@@ -146,7 +163,7 @@ export default function DriftWall({
                     onMouseEnter={() => activate(id, columnIndex)}
                     onMouseLeave={release}
                   >
-                    <img src={item.image} alt={item.title || ''} decoding="async" draggable="false" />
+                    <img data-gallery-image src={item.image} alt={item.title || ''} loading="lazy" decoding="async" draggable="false" />
                     <span className="drift-wall__shade" aria-hidden="true" />
                   </article>
                 )
