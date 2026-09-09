@@ -172,7 +172,7 @@ export default function DepthCarousel({ items, className = '', onChange, onSelec
               else changeFocus(index)
             }}
           >
-            <img src={item.image} alt="" loading="lazy" decoding="async" draggable="false" />
+            <img src={item.image} alt="" decoding="async" draggable="false" />
             <span ref={(element) => { tintRefs.current[index] = element }} />
           </button>
         ))}
