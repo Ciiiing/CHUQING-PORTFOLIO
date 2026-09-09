@@ -28,7 +28,7 @@ img { display: block; max-width: 100%; }
 :focus-visible { outline: 2px solid #8bbcff; outline-offset: 4px; }
 .page-width { width: var(--page); margin-inline: auto; }
 
-.site-shell { position: relative; height: 100svh; overflow: hidden; background: #030812; }
+.site-shell { --card-surface: linear-gradient(rgba(4, 16, 34, .18), rgba(4, 16, 34, .46)), var(--internship-card-bg) center / cover no-repeat; position: relative; height: 100svh; overflow: hidden; background: #030812; }
 .site-shell::before { display: none; }
 .background-scene, .ripple-video, .background-video-tint { position: fixed; inset: 0; width: 100%; height: 100%; }
 .background-scene { z-index: 0; overflow: hidden; }
