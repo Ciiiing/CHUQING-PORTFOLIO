@@ -25,7 +25,7 @@ import './styles.css'
 
 gsap.registerPlugin(ScrollTrigger)
 
-const asset = (name) => `${import.meta.env.BASE_URL}assets/${name}`
+const asset = (name) => new URL(`assets/${name}`, document.baseURI).href
 
 const copyRect = (element) => {
   if (!element) return null
