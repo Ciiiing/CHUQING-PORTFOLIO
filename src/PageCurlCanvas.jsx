@@ -70,16 +70,22 @@ void main() {
   outColor = vec4(color, 1.0);
 }`
 
-const loadTexture = (gl, source) => new Promise((resolve) => {
+const loadTexture = (gl, source, fallbackSource) => new Promise((resolve) => {
   const texture = new Texture(gl, { generateMipmaps: false })
   const image = new Image()
   image.decoding = 'async'
   image.onload = () => { texture.image = image; resolve(texture) }
-  image.onerror = () => resolve(texture)
+  image.onerror = () => {
+    if (fallbackSource && image.src !== fallbackSource) {
+      image.src = fallbackSource
+      return
+    }
+    resolve(texture)
+  }
   image.src = source
 })
 
-export default function PageCurlCanvas({ currentSrc, nextSrc, direction, currentMode = 'spread', nextMode = 'spread', onComplete, className = '' }) {
+export default function PageCurlCanvas({ currentSrc, currentFallbackSrc, nextSrc, nextFallbackSrc, direction, currentMode = 'spread', nextMode = 'spread', onComplete, className = '' }) {
   const mountRef = useRef(null)
 
   useEffect(() => {
@@ -110,7 +116,7 @@ export default function PageCurlCanvas({ currentSrc, nextSrc, direction, current
       }
     }
 
-    Promise.all([loadTexture(gl, currentSrc), loadTexture(gl, nextSrc)]).then(([current, next]) => {
+    Promise.all([loadTexture(gl, currentSrc, currentFallbackSrc), loadTexture(gl, nextSrc, nextFallbackSrc)]).then(([current, next]) => {
       if (stopped) return
       const modeValue = (mode) => mode === 'first' ? 1 : mode === 'last' ? 2 : 0
       const program = new Program(gl, {

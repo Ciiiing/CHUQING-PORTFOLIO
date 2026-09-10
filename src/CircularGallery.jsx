@@ -16,13 +16,13 @@ class GalleryMedia {
     this.imageAspect = 16 / 9
     this.imageLoaded = false
     this.onGeometryChange = onGeometryChange
-    this.createProgram(item.image)
+    this.createProgram(item)
     this.plane = new Mesh(gl, { geometry, program: this.program })
     this.plane.setParent(scene)
     this.resize(screen, viewport)
   }
 
-  createProgram(image) {
+  createProgram(item) {
     const texture = new Texture(this.gl, { generateMipmaps: true })
     this.program = new Program(this.gl, {
       depthTest: false,
@@ -67,7 +67,13 @@ class GalleryMedia {
       transparent: true,
     })
     const imageElement = new Image()
-    imageElement.src = image
+    imageElement.decoding = 'async'
+    const fallback = item.image
+    const primary = item.modernImage || fallback
+    imageElement.onerror = () => {
+      if (imageElement.src !== fallback) imageElement.src = fallback
+    }
+    imageElement.src = primary
     imageElement.onload = () => {
       texture.image = imageElement
       this.imageAspect = imageElement.naturalWidth / imageElement.naturalHeight
@@ -82,11 +88,19 @@ class GalleryMedia {
     this.viewport = viewport
     this.plane.scale.y = viewport.height * .756
     this.plane.scale.x = this.plane.scale.y * this.imageAspect
-    this.width = this.plane.scale.x * 1.38
+    // `width` is the layout advance, not the visual width. GalleryApp assigns
+    // one shared advance after all intrinsic image ratios are known.
+    this.planeWidth = this.plane.scale.x
+    this.width = this.planeWidth
   }
 
-  update(scroll, direction) {
-    this.plane.position.x = this.x - scroll.current - this.extra
+  update(scroll) {
+    const totalWidth = this.widthTotal || 1
+    const halfTotal = totalWidth / 2
+    // Keep one copy of each book and wrap its center into the viewport. This
+    // avoids duplicate planes crossing each other at the loop boundary.
+    const rawX = this.x - scroll.current
+    this.plane.position.x = ((rawX + halfTotal) % totalWidth + totalWidth) % totalWidth - halfTotal
     const x = this.plane.position.x
     const halfViewport = this.viewport.width / 2
     const bend = Math.abs(this.bend)
@@ -102,17 +116,13 @@ class GalleryMedia {
     // Keep the opening spread focused on three books; neighboring books enter
     // only after the gallery is scrolled far enough to bring them in.
     this.plane.visible = Math.abs(x) < halfViewport * .68 + halfPlane
-    const isBefore = x + halfPlane < -halfViewport
-    const isAfter = x - halfPlane > halfViewport
-    if (direction === 'right' && isBefore) this.extra -= this.widthTotal
-    if (direction === 'left' && isAfter) this.extra += this.widthTotal
   }
 }
 
 class GalleryApp {
   constructor(container, items, options) {
     this.container = container
-    this.items = items.concat(items)
+    this.items = items
     this.options = options
     this.initialPositioned = false
     this.scroll = { current: 0, target: 0, last: 0, ease: options.scrollEase }
@@ -167,10 +177,17 @@ class GalleryApp {
 
   layoutMedias() {
     if (!this.medias?.length) return
+    const maxPlaneWidth = Math.max(...this.medias.map((media) => media.planeWidth || media.plane.scale.x || 0))
+    // A shared slot keeps the visual gap stable even when a cover has a
+    // slightly different aspect ratio. The gap is intentionally compact so
+    // the opening three-book composition remains dense.
+    const gap = Math.max(.16, this.viewport.width * .012)
+    const advance = maxPlaneWidth + gap
     let cursor = 0
     this.medias.forEach((media) => {
       media.x = cursor
-      cursor += media.width
+      media.width = advance
+      cursor += advance
     })
     this.totalWidth = cursor
     this.medias.forEach((media) => { media.widthTotal = this.totalWidth })
@@ -182,7 +199,8 @@ class GalleryApp {
     let closestIndex = 0
     let closestDistance = Infinity
     this.medias.forEach((media, index) => {
-      const distance = Math.abs(media.x - normalized)
+      const direct = Math.abs(media.x - normalized)
+      const distance = Math.min(direct, this.totalWidth - direct)
       if (distance < closestDistance) {
         closestDistance = distance
         closestIndex = index
@@ -255,7 +273,7 @@ class GalleryApp {
         const distance = Math.abs(worldX - x)
         if (distance < closestDistance) {
           closestDistance = distance
-          closest = { index: mediaIndex % (this.items.length / 2), text: this.items[mediaIndex % (this.items.length / 2)].text }
+          closest = { index: mediaIndex % this.items.length, text: this.items[mediaIndex % this.items.length].text }
         }
       }
     })
@@ -266,15 +284,17 @@ class GalleryApp {
     if (!this.totalWidth) return
     const normalized = ((this.scroll.target % this.totalWidth) + this.totalWidth) % this.totalWidth
     const closest = this.medias[this.closestMediaIndex(this.scroll.target)]
-    this.scroll.target += closest.x - normalized
+    let delta = closest.x - normalized
+    if (delta > this.totalWidth / 2) delta -= this.totalWidth
+    if (delta < -this.totalWidth / 2) delta += this.totalWidth
+    this.scroll.target += delta
   }
 
   update() {
     this.scroll.current = lerp(this.scroll.current, this.scroll.target, this.scroll.ease)
-    const direction = this.scroll.current === this.scroll.last ? null : this.scroll.current > this.scroll.last ? 'right' : 'left'
-    this.medias?.forEach((media) => media.update(this.scroll, direction))
+    this.medias?.forEach((media) => media.update(this.scroll))
     if (this.medias?.[0]) {
-      const index = this.closestMediaIndex(this.scroll.current) % (this.items.length / 2)
+      const index = this.closestMediaIndex(this.scroll.current) % this.items.length
       if (index !== this.activeIndex) {
         this.activeIndex = index
         this.options.onActiveChange?.(index)

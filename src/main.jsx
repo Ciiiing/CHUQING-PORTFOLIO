@@ -26,6 +26,7 @@ import './styles.css'
 gsap.registerPlugin(ScrollTrigger)
 
 const asset = (name) => new URL(`assets/${name}`, document.baseURI).href
+const modernAsset = (name) => asset(name.replace(/\.(png|jpe?g)$/i, '.webp'))
 
 const copyRect = (element) => {
   if (!element) return null
@@ -339,12 +340,14 @@ const projectGalleryItems = [
           'By integrating brand strategy with visual design, the project connects the natural landscapes of the Qinling Mountains, oriental aesthetics, and modern consumer needs, creating a brand experience that balances cultural heritage with contemporary expression.',
         ],
       },
-      brochurePages: [
-        ...Array.from({ length: 11 }, (_, index) => ({
-          number: String(index + 1).padStart(2, '0'),
-          image: asset(`zhi-yuan-brochure-${String(index + 1).padStart(2, '0')}.png`),
-        })),
-      ],
+      // Reuse the high-resolution brochure pages already shipped with the
+      // editorial archive. This keeps the project detail and book archive in
+      // sync and avoids a second, missing asset set in the deployment.
+      brochurePages: Array.from({ length: 11 }, (_, index) => ({
+        number: String(index + 1).padStart(2, '0'),
+        image: asset(`book-pages/new-zhi-yuan/${index + 1}.jpg`),
+        modernImage: modernAsset(`book-pages/new-zhi-yuan/${index + 1}.jpg`),
+      })),
     },
   },
   {
@@ -432,6 +435,7 @@ const projectGalleryItems = [
       brochurePages: Array.from({ length: 9 }, (_, index) => ({
         number: String(index + 1).padStart(2, '0'),
         image: asset(`chinese-cinema-page-${index + 1}.png`),
+        modernImage: modernAsset(`chinese-cinema-page-${index + 1}.png`),
       })),
     },
   },
@@ -501,28 +505,30 @@ const graphicWorks = [
 ]
 
 const bookPageSet = (folder, count) => Array.from({ length: count }, (_, index) => ({
-    image: asset(`book-pages/${folder}/${index + 1}.jpg`),
-  }))
+  number: String(index + 1).padStart(2, '0'),
+  image: asset(`book-pages/${folder}/${index + 1}.jpg`),
+  modernImage: modernAsset(`book-pages/${folder}/${index + 1}.jpg`),
+}))
 
 const bookWorks = [
   {
-    id: 'zhi-yuan-editorial', image: asset('book-zhi-yuan-brochure.jpg'), text: '知源葡萄酒品牌宣传册',
+    id: 'zhi-yuan-editorial', image: asset('book-zhi-yuan-brochure.jpg'), modernImage: modernAsset('book-zhi-yuan-brochure.jpg'), text: '知源葡萄酒品牌宣传册',
     detail: { layout: 'book', directPageSwitch: true, bookPages: bookPageSet('new-zhi-yuan', 11), chinese: { title: '知源葡萄酒品牌宣传册', subtitle: 'ZHIYUAN WINE' }, english: { title: 'ZHIYUAN WINE BRAND BROCHURE', subtitle: 'ZHIYUAN WINE' } },
   },
   {
-    id: 'great-wall-dunhuang', image: asset('book-great-wall-dunhuang.jpg'), text: '从长城到敦煌：文化遗址的故事',
+    id: 'great-wall-dunhuang', image: asset('book-great-wall-dunhuang.jpg'), modernImage: modernAsset('book-great-wall-dunhuang.jpg'), text: '从长城到敦煌：文化遗址的故事',
     detail: { layout: 'book', directPageSwitch: true, bookPages: bookPageSet('new-great-wall', 8), chinese: { title: '从长城到敦煌：文化遗址的故事', subtitle: 'FROM THE GREAT WALL TO DUNHUANG' }, english: { title: 'FROM THE GREAT WALL TO DUNHUANG', subtitle: 'CULTURAL HERITAGE STORIES' } },
   },
   {
-    id: 'frame-probe', image: asset('book-frame-probe.jpg'), text: '杂志《帧·探》',
+    id: 'frame-probe', image: asset('book-frame-probe.jpg'), modernImage: modernAsset('book-frame-probe.jpg'), text: '杂志《帧·探》',
     detail: { layout: 'book', directPageSwitch: true, bookPages: bookPageSet('new-frame-probe', 22), chinese: { title: '杂志《帧·探》', subtitle: 'FRAME PROBE' }, english: { title: 'FRAME PROBE MAGAZINE', subtitle: 'FRAME PROBE' } },
   },
   {
-    id: 'new-voice', image: asset('book-new-voice.jpg'), text: '电子报《新声报》',
+    id: 'new-voice', image: asset('book-new-voice.jpg'), modernImage: modernAsset('book-new-voice.jpg'), text: '电子报《新声报》',
     detail: { layout: 'book', directPageSwitch: true, bookPages: bookPageSet('new-voice', 12), chinese: { title: '电子报《新声报》', subtitle: 'NEW VOICE' }, english: { title: 'NEW VOICE NEWSLETTER', subtitle: 'NEW VOICE' } },
   },
   {
-    id: 'ucass-recruitment', image: asset('book-ucass-recruitment.jpg'), text: '社科大新传学院招新宣传册',
+    id: 'ucass-recruitment', image: asset('book-ucass-recruitment.jpg'), modernImage: modernAsset('book-ucass-recruitment.jpg'), text: '社科大新传学院招新宣传册',
     detail: { layout: 'panorama-book', chinese: { title: '社科大新传学院招新宣传册', subtitle: 'UCASS SCHOOL OF JOURNALISM AND COMMUNICATION' }, english: { title: 'UCASS SCHOOL OF JOURNALISM AND COMMUNICATION', subtitle: 'RECRUITMENT BROCHURE' }, panoramaPages: [asset('ucass-page-1.png'), asset('ucass-page-2.png')] },
   },
 ]

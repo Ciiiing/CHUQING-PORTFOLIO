@@ -3,6 +3,13 @@ import gsap from 'gsap'
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import PageCurlCanvas from './PageCurlCanvas'
 
+const ProjectPageImage = ({ page, ...props }) => (
+  <picture className="project-detail-picture">
+    {page?.modernImage && <source srcSet={page.modernImage} type="image/webp" />}
+    <img {...props} src={page?.image} />
+  </picture>
+)
+
 export default function ProjectDetailModal({ project, language = 'zh', onClose }) {
   const detail = project.detail
   const pages = detail?.brochurePages ?? detail?.bookPages ?? []
@@ -127,7 +134,7 @@ export default function ProjectDetailModal({ project, language = 'zh', onClose }
             <section className="project-detail-panorama-layout" aria-label="Brochure pages">
               {panoramaPages.map((src, index) => (
                 <div className={`project-detail-panorama-page project-detail-panorama-page-${index + 1}`} key={src}>
-                  <div className="project-detail-panorama-frame" ref={(element) => { panoramaRefs.current[index] = element }}><img src={src} alt="" /></div>
+                  <div className="project-detail-panorama-frame" ref={(element) => { panoramaRefs.current[index] = element }}><img src={src} alt="" loading={index === 0 ? 'eager' : 'lazy'} decoding="async" /></div>
                 </div>
               ))}
             </section>
@@ -135,10 +142,12 @@ export default function ProjectDetailModal({ project, language = 'zh', onClose }
             <section className="project-detail-book-layout" aria-label="Book contents">
               <div className="project-detail-book-reader">
                 <div className="project-detail-book-page-stage">
-                  <img
+                  <ProjectPageImage
                     className={`project-detail-book-page${visiblePage === 0 ? ' is-cover-first' : visiblePage === bookPages.length - 1 ? ' is-cover-last' : ''}`}
-                    src={bookPages[visiblePage]?.image}
+                    page={bookPages[visiblePage]}
                     alt=""
+                    loading="eager"
+                    decoding="async"
                   />
                 </div>
                 <div className="project-detail-book-controls">
@@ -152,8 +161,8 @@ export default function ProjectDetailModal({ project, language = 'zh', onClose }
             </section>
           ) : detail?.layout === 'split' ? (
             <section className="project-detail-split">
-              <div className="project-detail-split-media">
-                <img src={detail.image} alt={localizedDetail?.title ?? project.label} />
+                <div className="project-detail-split-media">
+                <img src={detail.image} alt={localizedDetail?.title ?? project.label} loading="lazy" decoding="async" />
               </div>
               <div className="project-detail-split-copy">
                 <p className="project-detail-split-eyebrow">{localizedDetail?.eyebrow}</p>
@@ -166,11 +175,13 @@ export default function ProjectDetailModal({ project, language = 'zh', onClose }
             </section>
           ) : pages.length > 0 ? (
             <section className={`project-flipbook${project.id === 'film' ? ' is-cinema' : ''}`} aria-label="Project brochure">
-              {turn && <img className={`project-flipbook-under${underPositionClass}`} src={pages[underPage].image} alt="" aria-hidden="true" />}
+              {turn && <ProjectPageImage className={`project-flipbook-under${underPositionClass}`} page={pages[underPage]} alt="" aria-hidden="true" loading="eager" decoding="async" />}
               {turn ? (
                 <PageCurlCanvas
-                  currentSrc={pages[pageIndex].image}
-                  nextSrc={pages[turn.nextIndex].image}
+                  currentSrc={pages[pageIndex].modernImage || pages[pageIndex].image}
+                  currentFallbackSrc={pages[pageIndex].image}
+                  nextSrc={pages[turn.nextIndex].modernImage || pages[turn.nextIndex].image}
+                  nextFallbackSrc={pages[turn.nextIndex].image}
                   direction={turn.direction}
                   currentMode={pageMode(pageIndex)}
                   nextMode={pageMode(turn.nextIndex)}
@@ -178,18 +189,20 @@ export default function ProjectDetailModal({ project, language = 'zh', onClose }
                   className={pagePositionClass}
                 />
               ) : (
-                <img
+                <ProjectPageImage
                   className={`project-flipbook-page${pagePositionClass}`}
-                  key={pages[visiblePage].image}
-                  src={pages[visiblePage].image}
+                  key={pages[visiblePage].modernImage || pages[visiblePage].image}
+                  page={pages[visiblePage]}
                   alt={`Brochure page ${pages[visiblePage].number}`}
+                  loading="eager"
+                  decoding="async"
                 />
               )}
               <button type="button" className="project-flipbook-arrow project-flipbook-arrow-left" onClick={() => changePage(-1)} disabled={Boolean(turn)} aria-label="Previous brochure page"><ChevronLeft size={24} /></button>
               <button type="button" className="project-flipbook-arrow project-flipbook-arrow-right" onClick={() => changePage(1)} disabled={Boolean(turn)} aria-label="Next brochure page"><ChevronRight size={24} /></button>
             </section>
           ) : (
-            <div className="project-detail-cover"><img src={detail?.contentImage ?? project.image} alt="" /></div>
+            <div className="project-detail-cover"><img src={detail?.contentImage ?? project.image} alt="" loading="lazy" decoding="async" /></div>
           )}
 
           {localizedDetail && !['split', 'book', 'panorama-book'].includes(detail?.layout) ? (
